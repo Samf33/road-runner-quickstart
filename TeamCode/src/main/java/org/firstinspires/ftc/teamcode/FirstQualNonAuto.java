@@ -39,12 +39,10 @@ public class FirstQualNonAuto extends LinearOpMode {
         mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
-
         waitForStart();
 
         while (!isStopRequested()) {
 
-            // === DRIVETRAIN (RR 1.x) ===
             drive.setDrivePowers(
                     new PoseVelocity2d(
                             new Vector2d(
@@ -55,7 +53,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                     )
             );
 
-            // === TELEMETRY ===
             telemetry.addData(
                     "Servo Speeds",
                     "left: " + servoLaunchLeft.getPower() +
@@ -87,7 +84,6 @@ public class FirstQualNonAuto extends LinearOpMode {
 
             telemetry.update();
 
-            // === INTAKE ===
             if (gamepad1.right_trigger >= 0.3) {
                 in();
             } else {
@@ -95,7 +91,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                 smallLauncherWheels.setPower(0);
             }
 
-            // === SHOOT ===
             if (gamepad1.left_trigger >= 0.3) {
                 shoot();
             } else {
@@ -103,7 +98,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                 servoLaunchRight.setPower(0);
             }
 
-            // === MODE TOGGLE ===
             if (gamepad1.x) {
                 mode += 1;
                 sleep(200); // debounce
@@ -114,7 +108,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                 sleep(200); // debounce
             }
 
-            // === MANUAL OVERRIDES ===
             if (gamepad1.dpad_right) {
                 servoLaunchRight.setPower(1);
             }
@@ -125,7 +118,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                 mainLauncher.setPower(0.9);
             }
 
-            // === LAUNCHER LOGIC ===
             if (launchOn) {
                 if (mode % 3 == 0) {
                     mainLauncher.setPower(1);
@@ -141,6 +133,7 @@ public class FirstQualNonAuto extends LinearOpMode {
                 mainLauncher.setPower(0);
                 mainLauncher2.setPower(0);
             }
+            drive.updatePoseEstimate();
         }
     }
 
