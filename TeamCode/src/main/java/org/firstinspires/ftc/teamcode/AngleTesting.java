@@ -9,8 +9,8 @@ public class AngleTesting extends LinearOpMode {
 
     final double GEAR_RATIO = 29.0 / 300.0;
 
-    final double SERVO_MIN_DEG = 0.0;
-    final double SERVO_MAX_DEG = 180.0;
+    final double SERVO_MIN_DEG = 30.0;
+    final double SERVO_MAX_DEG = 60.0;
 
     Servo launcherAngleServo;
 
