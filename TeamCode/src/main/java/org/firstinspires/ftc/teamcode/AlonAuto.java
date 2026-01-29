@@ -88,19 +88,28 @@ public class AlonAuto extends LinearOpMode {
                 .build();
         Action fullShoot = new SequentialAction(
                 shoot(),
-                new SleepAction(2),
+                new SleepAction(1.5),
                 idleServos(),
                 idleLaunchMotors()
         );
+        Action fullIntake = new SequentialAction(
+                intake(),
+                new SleepAction(1.5),
+                idleIntake(),
+                idleTransfer()
+        );
         Action fullAuto = new SequentialAction(
-                new ParallelAction(getFirstRow, intake()),
-                new ParallelAction(goToLaunch1, getToPower()),
+//                new ParallelAction(getFirstRow,intake()),
+                new ParallelAction(new SequentialAction(getFirstRow, goToLaunch1),fullIntake, getToPower()),
+//                new ParallelAction(goToLaunch1, getToPower()),
                 fullShoot,
-                new ParallelAction(getSecondRow, intake()),
-                new ParallelAction(goToLaunch2, getToPower()),
+//                new ParallelAction(getSecondRow,intake()),
+                new ParallelAction(new SequentialAction(getSecondRow, goToLaunch2),fullIntake, getToPower()),
+//                new ParallelAction(goToLaunch2, getToPower()),
                 fullShoot,
-                new ParallelAction(getThirdRow, intake()),
-                new ParallelAction(goToLaunch3, getToPower()),
+//                new ParallelAction(getThirdRow,intake()),
+                new ParallelAction(new SequentialAction(getThirdRow, goToLaunch3),fullIntake, getToPower()),
+//                new ParallelAction(goToLaunch3, getToPower()),
                 fullShoot
         );
 
@@ -149,5 +158,17 @@ public class AlonAuto extends LinearOpMode {
     public void in() {
             intake.setPower(0.8);
             smallLauncherWheels.setPower(0.5);
+    }
+    public  void killTransfer() {
+        smallLauncherWheels.setPower(0);
+    }
+    public Action idleTransfer() {
+        return new InstantAction(this::killTransfer);
+    }
+    public void killIntake() {
+        intake.setPower(0);
+    }
+    public Action idleIntake() {
+        return new InstantAction(this::killIntake);
     }
 }

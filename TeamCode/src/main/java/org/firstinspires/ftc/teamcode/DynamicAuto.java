@@ -36,7 +36,7 @@ public class DynamicAuto extends LinearOpMode {
         initDriveAndMotors();
 
 
-        while (true) {
+        while (!isStopRequested()) {
             goAndGetABall();
         }
     }

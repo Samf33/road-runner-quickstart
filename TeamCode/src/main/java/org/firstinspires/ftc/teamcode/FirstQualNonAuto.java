@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
@@ -18,6 +19,7 @@ public class FirstQualNonAuto extends LinearOpMode {
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
+    Servo aim;
 
     boolean maxSpeed = false;
 
@@ -31,7 +33,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         mainLauncher = hardwareMap.get(DcMotorEx.class, "ml");
         mainLauncher2 = hardwareMap.get(DcMotorEx.class, "ml2");
         intake = hardwareMap.dcMotor.get("intake");
-
+        aim = hardwareMap.servo.get("aim");
         servoLaunchLeft = hardwareMap.get(CRServo.class, "slLeft");
         servoLaunchRight = hardwareMap.get(CRServo.class, "slRight");
 
@@ -42,7 +44,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
-
+            aim.setPosition(10 * (300/29)); //10 is test angle and equates to 40 degrees off of vertical
             drive.setDrivePowers(
                     new PoseVelocity2d(
                             new Vector2d(
@@ -94,18 +96,14 @@ public class FirstQualNonAuto extends LinearOpMode {
             if (gamepad1.left_trigger >= 0.3) {
                 shoot();
             } else {
-                servoLaunchLeft.setPower(0);
-                servoLaunchRight.setPower(0);
+                servoLaunchLeft.setPower(-.3);
+                servoLaunchRight.setPower(-.3);
             }
 
-            if (gamepad1.x) {
-                mode += 1;
-                sleep(200); // debounce
-            }
+
 
             if (gamepad1.a) {
                 launchOn = !launchOn;
-                sleep(200); // debounce
             }
 
             if (gamepad1.dpad_right) {
@@ -119,22 +117,15 @@ public class FirstQualNonAuto extends LinearOpMode {
             }
 
             if (launchOn) {
-                if (mode % 3 == 0) {
-                    mainLauncher.setPower(1);
-                    mainLauncher2.setPower(0);
-                } else if (mode % 3 == 1) {
-                    mainLauncher2.setPower(1);
-                    mainLauncher.setPower(0);
-                } else {
-                    mainLauncher.setPower(1);
-                    mainLauncher2.setPower(1);
-                }
+                    mainLauncher.setPower(.9);
+                    mainLauncher2.setPower(.9);
             } else {
                 mainLauncher.setPower(0);
                 mainLauncher2.setPower(0);
             }
             drive.updatePoseEstimate();
         }
+
     }
 
     // === HELPERS ===
