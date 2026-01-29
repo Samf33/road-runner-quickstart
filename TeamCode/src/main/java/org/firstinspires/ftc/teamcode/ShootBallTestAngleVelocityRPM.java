@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -14,6 +17,9 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
 
     final double SERVO_MIN_DEG = 30.0;
     final double SERVO_MAX_DEG = 60.0;
+
+    final double POSITION_TARGET_H = 147.276200386;
+    final double POSITION_TARGET_V = POSITION_TARGET_H;
 
     boolean downDebounce, upDebounce, leftDebounce, rightDebounce, xDebounce;
 
@@ -44,9 +50,9 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
 
         launcherAngleServo.setPosition(0.0);
 
-        while (!isStopRequested()) {
-            boolean shot = false;
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
 
+        while (!isStopRequested()) {
             if (gamepad1.dpad_up) {
                 if (!upDebounce) {
                     upDebounce = true;
@@ -66,7 +72,7 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
             if (gamepad1.dpad_left) {
                 if (!leftDebounce) {
                     leftDebounce = true;
-                    currentPower = 0.9;
+                    currentPower -= 0.05;
                 }
             } else
                 leftDebounce = false;
@@ -74,7 +80,7 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 if (!rightDebounce) {
                     rightDebounce = true;
-                    currentPower = 0.5;
+                    currentPower += 0.05;
                 }
             } else
                 rightDebounce = false;
@@ -112,6 +118,8 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
                 servoLaunchRight.setPower(-0.3);
             }
 
+            Pose2d pose = drive.localizer.getPose();
+
             telemetry.addData("Launcher Angle (deg)", launcherAngle);
             telemetry.addData("Launcher Power", currentPower);
             telemetry.addData(
@@ -119,9 +127,14 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
                     "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
                             " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
             );
+
+            Vector2d difference = pose.position.minus(new Vector2d(POSITION_TARGET_H, POSITION_TARGET_V));
+            telemetry.addData("Distance to target base (cm)", Math.sqrt(difference.x * difference.x + difference.y * difference.y));
             
             if (gamepad1.right_trigger >= 0.3)
                 telemetry.update();
+
+            drive.updatePoseEstimate();
         }
     }
 }
