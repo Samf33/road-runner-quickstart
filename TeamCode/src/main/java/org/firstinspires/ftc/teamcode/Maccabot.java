@@ -72,7 +72,7 @@ public class Maccabot extends LinearOpMode {
             smallLauncherWheels.setPower(SMALL_WHEELS_POWER);
         } else {
             intake.setPower(0);
-            if (!shooting()) {
+            if (!getIsShooting()) {
                 smallLauncherWheels.setPower(0);
             }
         }
@@ -114,7 +114,7 @@ public class Maccabot extends LinearOpMode {
         } else {
             servoLaunchRight.setPower(SERVO_LAUNCH_IDLE_POWER);
             servoLaunchLeft.setPower(SERVO_LAUNCH_IDLE_POWER);
-            if (!intaking()) {
+            if (!getIsIntaking()) {
                 smallLauncherWheels.setPower(0);
             }
         }
