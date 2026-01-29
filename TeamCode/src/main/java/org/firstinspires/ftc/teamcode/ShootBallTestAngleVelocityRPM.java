@@ -86,8 +86,8 @@ public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
                 feederLeft.setPower(1);
                 feederRight.setPower(1);
             } else {
-                feederLeft.setPower(0);
-                feederRight.setPower(0);
+                feederLeft.setPower(-0.3);
+                feederRight.setPower(-0.3);
             }
 
             drive.updatePoseEstimate();
