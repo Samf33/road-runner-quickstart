@@ -34,7 +34,7 @@ public class Maccabot extends LinearOpMode {
     public void runOpMode() {
         initDriveAndMotors();
         initLimelight();
-        waitForStart();
+        initLight();
         setShoot(false);
     }
 
