@@ -36,9 +36,10 @@ public class FirstQualNonAuto extends LinearOpMode {
         aim = hardwareMap.servo.get("aim");
         servoLaunchLeft = hardwareMap.get(CRServo.class, "slLeft");
         servoLaunchRight = hardwareMap.get(CRServo.class, "slRight");
-
+        mainLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+        smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
+//        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         waitForStart();
@@ -66,23 +67,23 @@ public class FirstQualNonAuto extends LinearOpMode {
                     mode % 3 + "    0 = launch1 | 1 = launch2 | 2 = both"
             );
 
-            telemetry.addData(
-                    "motor speed (ticks/sec)",
-                    "L1: " + mainLauncher.getVelocity() +
-                            " L2: " + mainLauncher2.getVelocity()
-            );
-
-            telemetry.addData(
-                    "motor speed (RPS)",
-                    "L1: " + mainLauncher.getVelocity() / 28 +
-                            " L2: " + mainLauncher2.getVelocity() / 28
-            );
-
-            telemetry.addData(
-                    "motor speed (RPM)",
-                    "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
-                            " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
-            );
+//            telemetry.addData(
+//                    "motor speed (ticks/sec)",
+//                    "L1: " + mainLauncher.getVelocity() +
+//                            " L2: " + mainLauncher2.getVelocity()
+//            );
+//
+//            telemetry.addData(
+//                    "motor speed (RPS)",
+//                    "L1: " + mainLauncher.getVelocity() / 28 +
+//                            " L2: " + mainLauncher2.getVelocity() / 28
+//            );
+//
+//            telemetry.addData(
+//                    "motor speed (RPM)",
+//                    "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
+//                            " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
+            //);
 
             telemetry.update();
 
@@ -113,12 +114,12 @@ public class FirstQualNonAuto extends LinearOpMode {
                 servoLaunchLeft.setPower(1);
             }
             if (gamepad1.dpad_up) {
-                mainLauncher.setPower(0.9);
+                mainLauncher.setPower(0.70);
             }
 
             if (launchOn) {
-                    mainLauncher.setPower(.9);
-                    mainLauncher2.setPower(.9);
+                    mainLauncher.setPower(.70);
+                    mainLauncher2.setPower(.70);
             } else {
                 mainLauncher.setPower(0);
                 mainLauncher2.setPower(0);
