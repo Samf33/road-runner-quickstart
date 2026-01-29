@@ -1,6 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(group = "drive")
@@ -8,6 +6,7 @@ public class MaccabotTeleop extends Maccabot {
     @Override
     public void runOpMode() {
         super.runOpMode();
+        setLaunch(true);
         while (!isStopRequested()) {
             setDrive(-gamepad1.left_stick_y, - gamepad1.left_stick_x, -gamepad1.right_stick_x); // DRIVE
 
@@ -40,6 +39,11 @@ public class MaccabotTeleop extends Maccabot {
             } else {
                 setLight(0.277);
             }
+
+            telemetry.addData("IsLaunching", getIsLaunching());
+            telemetry.addData("IsShooting", getIsShooting());
+            telemetry.addData("IsIntaking", getIsIntaking());
+
 
             updatePoseEstimate();
         }
