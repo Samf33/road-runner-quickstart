@@ -1,140 +1,105 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(group = "drive")
 public class ShootBallTestAngleVelocityRPM extends LinearOpMode {
 
-    final double GEAR_RATIO = 29.0 / 300.0;
-
     final double SERVO_MIN_DEG = 30.0;
     final double SERVO_MAX_DEG = 60.0;
 
-    final double POSITION_TARGET_H = 147.276200386;
-    final double POSITION_TARGET_V = POSITION_TARGET_H;
+    double angleInput = 0.5;
+    double powerInput = 0.0;
 
-    boolean downDebounce, upDebounce, leftDebounce, rightDebounce, xDebounce;
+    boolean shootToggle = false;
+    boolean upLatch, downLatch, leftLatch, rightLatch, xLatch;
 
-    double currentAngle = 0.0;
-    double currentPower = 0.0;
+    Servo angleServo;
+    DcMotorEx launcherA, launcherB;
+    CRServo feederLeft, feederRight;
 
-    boolean isShooting = false;
-
-    Servo launcherAngleServo;
-
-    DcMotorEx mainLauncher2, mainLauncher;
-    CRServo servoLaunchRight, servoLaunchLeft;
+    final Vector2d TARGET_POS = new Vector2d(147.276200386, 147.276200386);
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
-        mainLauncher = hardwareMap.get(DcMotorEx.class, "ml");
-        mainLauncher2 = hardwareMap.get(DcMotorEx.class, "ml2");
-        servoLaunchLeft = hardwareMap.get(CRServo.class, "slLeft");
-        servoLaunchRight = hardwareMap.get(CRServo.class, "slRight");
+        angleServo = hardwareMap.get(Servo.class, "launcherAngleServo");
+        launcherA = hardwareMap.get(DcMotorEx.class, "ml");
+        launcherB = hardwareMap.get(DcMotorEx.class, "ml2");
+        feederLeft = hardwareMap.get(CRServo.class, "slLeft");
+        feederRight = hardwareMap.get(CRServo.class, "slRight");
 
-        launcherAngleServo = hardwareMap.get(Servo.class, "launcherAngleServo");
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
 
-        final double LAUNCHER_ANGLE_MIN = SERVO_MIN_DEG * GEAR_RATIO;
-        final double LAUNCHER_ANGLE_MAX = SERVO_MAX_DEG * GEAR_RATIO;
+        angleServo.setPosition(SERVO_MIN_DEG / 180.0);
 
         waitForStart();
 
-        launcherAngleServo.setPosition(0.0);
+        while (opModeIsActive()) {
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
+            if (gamepad1.dpad_up && !upLatch) {
+                angleInput += 0.05;
+                upLatch = true;
+            } else if (!gamepad1.dpad_up) upLatch = false;
 
-        while (!isStopRequested()) {
-            if (gamepad1.dpad_up) {
-                if (!upDebounce) {
-                    upDebounce = true;
-                    currentAngle += 0.05;
-                }
-            } else
-                upDebounce = false;
+            if (gamepad1.dpad_down && !downLatch) {
+                angleInput -= 0.05;
+                downLatch = true;
+            } else if (!gamepad1.dpad_down) downLatch = false;
 
-            if (gamepad1.dpad_down) {
-                if (!downDebounce) {
-                    downDebounce = true;
-                    currentAngle -= 0.05;
-                }
-            } else
-                downDebounce = false;
+            if (gamepad1.dpad_right && !rightLatch) {
+                powerInput += 0.05;
+                rightLatch = true;
+            } else if (!gamepad1.dpad_right) rightLatch = false;
 
-            if (gamepad1.dpad_left) {
-                if (!leftDebounce) {
-                    leftDebounce = true;
-                    currentPower -= 0.05;
-                }
-            } else
-                leftDebounce = false;
+            if (gamepad1.dpad_left && !leftLatch) {
+                powerInput -= 0.05;
+                leftLatch = true;
+            } else if (!gamepad1.dpad_left) leftLatch = false;
 
-            if (gamepad1.dpad_right) {
-                if (!rightDebounce) {
-                    rightDebounce = true;
-                    currentPower += 0.05;
-                }
-            } else
-                rightDebounce = false;
+            if (gamepad1.x && !xLatch) {
+                shootToggle = !shootToggle;
+                xLatch = true;
+            } else if (!gamepad1.x) xLatch = false;
 
-            double launcherAngle = LAUNCHER_ANGLE_MIN + currentAngle * (LAUNCHER_ANGLE_MAX - LAUNCHER_ANGLE_MIN);
+            angleInput = Math.max(0.0, Math.min(1.0, angleInput));
+            powerInput = Math.max(0.0, Math.min(1.0, powerInput));
 
-            double servoAngle = launcherAngle / GEAR_RATIO;
+            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);
+            angleServo.setPosition(servoDeg / 180.0);
 
-            double servoPos = Math.max(0.0, Math.min(1.0, servoAngle / 180.0));
-
-            launcherAngleServo.setPosition(servoPos);
-
-            if (gamepad1.x) {
-                if (!xDebounce) {
-                    xDebounce = true;
-                    isShooting = !isShooting;
-                }
-            } else
-                xDebounce = false;
-
-            if (isShooting) {
-                mainLauncher.setPower(currentPower);
-                mainLauncher2.setPower(currentPower);
+            if (shootToggle) {
+                launcherA.setPower(powerInput);
+                launcherB.setPower(powerInput);
             } else {
-                mainLauncher.setPower(0);
-                mainLauncher2.setPower(0);
+                launcherA.setPower(0);
+                launcherB.setPower(0);
             }
 
-            if (gamepad1.right_trigger >= 0.3) {
-                servoLaunchLeft.setPower(1);
-                servoLaunchRight.setPower(1);
-            } else
-            {
-                servoLaunchLeft.setPower(-0.3);
-                servoLaunchRight.setPower(-0.3);
+            if (gamepad1.right_trigger > 0.3) {
+                feederLeft.setPower(1);
+                feederRight.setPower(1);
+            } else {
+                feederLeft.setPower(0);
+                feederRight.setPower(0);
             }
-
-            Pose2d pose = drive.localizer.getPose();
-
-            telemetry.addData("Launcher Angle (deg)", launcherAngle);
-            telemetry.addData("Launcher Power", currentPower);
-            telemetry.addData(
-                    "motor speed (RPM)",
-                    "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
-                            " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
-            );
-
-            Vector2d difference = pose.position.minus(new Vector2d(POSITION_TARGET_H, POSITION_TARGET_V));
-            telemetry.addData("Distance to target base (cm)", Math.sqrt(difference.x * difference.x + difference.y * difference.y));
-            
-            if (gamepad1.right_trigger >= 0.3)
-                telemetry.update();
 
             drive.updatePoseEstimate();
+            Pose2d pose = drive.localizer.getPose();
+            Vector2d diff = pose.position.minus(TARGET_POS);
+
+            telemetry.addData("Angle (deg)", servoDeg);
+            telemetry.addData("Power", powerInput);
+            telemetry.addData("RPM A", 60 * (launcherA.getVelocity() / 28.0));
+            telemetry.addData("RPM B", 60 * (launcherB.getVelocity() / 28.0));
+            telemetry.addData("Distance (cm)", Math.hypot(diff.x, diff.y));
+            telemetry.update();
         }
     }
 }
