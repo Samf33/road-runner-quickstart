@@ -1,15 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
-import java.util.Vector;
 
 
 @Autonomous(group = "drive")
@@ -20,7 +13,7 @@ public class DynamicAuto extends Maccabot {
     final double FOUND_ROTATE_SPEED = 0.4;
     final double FOUND_MOVE_SPEED = 0.8;
     final double CORRECT_ROTATION_SPEED = 0.2;
-    final double LOOK_THREASHHOLD = 5;
+    final double LOOK_THRESHOLD = 5;
     final int EXTRA_BALL_CATCHING_MOVEMENT_TIME = 700;
 
     @Override
@@ -48,7 +41,7 @@ public class DynamicAuto extends Maccabot {
             idle();
         }
 
-        while (faceTowardsBall(ball) < LOOK_THREASHHOLD) {
+        while (faceTowardsBall(ball) < LOOK_THRESHOLD) {
             ball = getBall();
             if (ball == null) {
                 return false;
