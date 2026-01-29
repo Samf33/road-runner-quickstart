@@ -13,7 +13,7 @@ import java.util.Vector;
 
 
 @Autonomous(group = "drive")
-public class DynamicAuto extends LinearOpMode {
+public class DynamicAuto extends Maccabot {
 
     // CONSTANTS
     final double SEARCH_SPEED = 0.2;
@@ -23,71 +23,71 @@ public class DynamicAuto extends LinearOpMode {
     final double LOOK_THREASHHOLD = 5;
     final int EXTRA_BALL_CATCHING_MOVEMENT_TIME = 700;
 
-    // ROBOT INTERFACE
-    private Limelight3A limelight;
-    private MecanumDrive drive;
-    private DcMotor intake;
-
-
-
     @Override
     public void runOpMode() {
-        initLimelight();
-        initDriveAndMotors();
+        super.runOpMode();
+        waitForStart();
 
+        int numBalls = 0;
 
         while (!isStopRequested()) {
-            goAndGetABall();
+            if (goAndGetABall()) {
+                numBalls++;
+            }
+
+            if (numBalls >= 3) {
+                //shoot
+            }
         }
     }
 
-    private void goAndGetABall() {
+    private boolean goAndGetABall() { // returns true if it got a ball
         double[] ball = getBall();
         while ((ball = getBall()) == null) { // SEARCHES UNTIL IT FINDS A BALL
-            search();
+            setDrive(0, 0, SEARCH_SPEED);
             idle();
         }
 
         while (faceTowardsBall(ball) < LOOK_THREASHHOLD) {
             ball = getBall();
             if (ball == null) {
-                return;
+                return false;
             }
+
+
         }
 
 
-        intake.setPower(-0.75);
+        setIntake(true);
         while ((ball = getBall()) != null) {
-            grabBall(ball);
+            boolean goRight = ball[0] <= 0;
+
+            updatePoseEstimate();
+            Pose2d position = getPosition();
+            double nextPositionX = position.position.x + position.heading.vec().x * FOUND_MOVE_SPEED * 5;
+
+            if (position.position.x * nextPositionX <= 0) {
+                goTo(0, 0, 0);
+                return false;
+            }
+
+            setDrive(FOUND_MOVE_SPEED, 0, goRight ? CORRECT_ROTATION_SPEED : -CORRECT_ROTATION_SPEED);
             idle();
         }
 
-        goForward();
+        setDrive(FOUND_MOVE_SPEED, 0, 0);
         sleep(EXTRA_BALL_CATCHING_MOVEMENT_TIME);
-        stopMoving();
-        intake.setPower(0);
-    }
+        stopDrive();
+        setIntake(false);
 
-    private void initLimelight() {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.start();
-        limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(0);
-    }
-
-    private void initDriveAndMotors() {
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0,0, 0));
-        waitForStart();
-        intake = hardwareMap.dcMotor.get("intake");
+        return true;
     }
 
     private double[] getBall() {
-        limelight.pipelineSwitch(0);
-        LLResult greenBall = limelight.getLatestResult();
+        LLResult greenBall = getLimelightResult(0);
         boolean greenBallIsValid = greenBall != null && greenBall.isValid();
 
-        limelight.pipelineSwitch(1);
-        LLResult purpleBall = limelight.getLatestResult();
+        LLResult purpleBall = getLimelightResult(1);
         boolean purpleBallIsValid = purpleBall != null && purpleBall.isValid();
 
         double[] ball = new double[2];
@@ -113,66 +113,9 @@ public class DynamicAuto extends LinearOpMode {
         return  ball;
     }
 
-    public void search() {
-        drive.setDrivePowers(
-                new PoseVelocity2d(
-                        new Vector2d(0.0, 0.0),
-                        SEARCH_SPEED
-                )
-        );
-    }
-
     public double faceTowardsBall(double[] ball) { // returns how off it is from the ball
         boolean goRight = ball[0] <= 0;
-
-        drive.setDrivePowers(
-                new PoseVelocity2d(
-                        new Vector2d(
-                                0.0,  // forward
-                                0.0                // strafe
-                        ),
-                        goRight ? FOUND_ROTATE_SPEED : -FOUND_ROTATE_SPEED
-                )
-        );
-
+        setDrive(0,0, goRight ? FOUND_ROTATE_SPEED : -FOUND_ROTATE_SPEED);
         return Math.abs(ball[0]);
-    }
-
-    public void grabBall(double[] ball) {
-        boolean goRight = ball[0] <= 0;
-
-        drive.setDrivePowers(
-                new PoseVelocity2d(
-                        new Vector2d(
-                                FOUND_MOVE_SPEED,  // forward
-                                0.0                // strafe
-                        ),
-                        goRight ? CORRECT_ROTATION_SPEED : -CORRECT_ROTATION_SPEED
-                )
-        );
-    }
-
-    public void goForward() {
-        drive.setDrivePowers(
-                new PoseVelocity2d(
-                        new Vector2d(
-                                FOUND_MOVE_SPEED,  // forward
-                                0.0                // strafe
-                        ),
-                        0.0
-                )
-        );
-    }
-
-    public void stopMoving() {
-        drive.setDrivePowers(
-                new PoseVelocity2d(
-                        new Vector2d(
-                                0.0,  // forward
-                                0.0                // strafe
-                        ),
-                        0.0
-                )
-        );
     }
 }

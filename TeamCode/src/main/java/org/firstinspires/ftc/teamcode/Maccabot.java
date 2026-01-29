@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -59,6 +61,7 @@ public class Maccabot extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
         limelight.setPollRateHz(100);
+        limelight.pipelineSwitch(0);
     }
 
     private void initLight() {
@@ -152,5 +155,21 @@ public class Maccabot extends LinearOpMode {
 
     public void updatePoseEstimate() {
         drive.updatePoseEstimate();
+    }
+
+    public LLResult getLimelightResult(int pipeline) {
+        limelight.pipelineSwitch(pipeline);
+        return limelight.getLatestResult();
+    }
+
+    public Pose2d getPosition() {
+        return drive.localizer.getPose();
+    }
+
+    public void goTo(double x, double y, double r) {
+        updatePoseEstimate();
+        Action action = drive.actionBuilder(getPosition())
+                .splineTo(new Vector2d(x, y), r)
+                .build();
     }
 }
