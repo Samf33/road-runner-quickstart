@@ -16,6 +16,8 @@ public class RotationTest extends LinearOpMode {
     double targetX = 0;
     double targetY = 0;
 
+    final double SPEED_MULT = 1.0;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -34,7 +36,7 @@ public class RotationTest extends LinearOpMode {
             double newHeading = Math.atan2(dy, dx);
             double error = Math.IEEEremainder(newHeading - pose.heading.toDouble(), 2.0 * Math.PI);
 
-            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), error / (2.0 * Math.PI)));
+            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), error / (2.0 * Math.PI) * SPEED_MULT));
 
             telemetry.update();
         }
