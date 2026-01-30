@@ -45,7 +45,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 //        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
-        PIDFCoefficients pidf = new PIDFCoefficients(10, 3, 0, 11.7);
+        PIDFCoefficients pidf = new PIDFCoefficients(0, 0, 0, 11.7);
         mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
         angleServo.setDirection(Servo.Direction.REVERSE);
         mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
@@ -90,8 +90,8 @@ public class FirstQualNonAuto extends LinearOpMode {
                             " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
             );
             telemetry.addData("position", drive.localizer.getPose().position);
-            telemetry.addData("heading",drive.localizer.getPose().heading);
-            telemetry.addData("target RPM", targetRPM)
+            telemetry.addData("heading",drive.localizer.getPose().heading.toDouble());
+            telemetry.addData("target RPM", targetRPM);
 
             telemetry.update();
 
