@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -40,6 +41,9 @@ public class FirstQualNonAuto extends LinearOpMode {
         smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 //        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
+        PIDFCoefficients pidf = new PIDFCoefficients(10, 3, 0, 11.7);
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         waitForStart();
