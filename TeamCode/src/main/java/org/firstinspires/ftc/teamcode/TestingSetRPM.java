@@ -19,7 +19,7 @@ public class TestingSetRPM extends LinearOpMode {
 
 
         motor = hardwareMap.get(DcMotorEx.class, "test");
-        motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(10, 0, 0, 11.8));
+        motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(10, 0, 0, 12));
         while(!isStopRequested()) {
             velocity = (targetRPM * ticksPerRev) / 60.0;
             motor.setVelocity(velocity);
