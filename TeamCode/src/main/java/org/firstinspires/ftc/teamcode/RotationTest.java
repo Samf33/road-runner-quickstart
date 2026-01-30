@@ -32,7 +32,7 @@ public class RotationTest extends LinearOpMode {
             double dy = targetY - pose.position.y;
 
             double newHeading = Math.atan2(dy, dx);
-            double error = newHeading - pose.heading.toDouble() % 360;
+            double error = Math.IEEEremainder(newHeading - pose.heading.toDouble(), 2.0 * Math.PI);
 
             drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), error));
 
