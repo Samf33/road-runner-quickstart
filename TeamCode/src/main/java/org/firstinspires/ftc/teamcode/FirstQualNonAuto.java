@@ -20,7 +20,11 @@ public class FirstQualNonAuto extends LinearOpMode {
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
-    Servo aim;
+    Servo angleServo;
+    double angleInput = 0;
+    final double SERVO_MIN_DEG = 30.0;
+    final double SERVO_MAX_DEG = 60.0;
+    final Vector2d TARGET_POS = new Vector2d(57.98275605748032, 57.98275605748032);
 
     boolean maxSpeed = false;
 
@@ -34,7 +38,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         mainLauncher = hardwareMap.get(DcMotorEx.class, "ml");
         mainLauncher2 = hardwareMap.get(DcMotorEx.class, "ml2");
         intake = hardwareMap.dcMotor.get("intake");
-        aim = hardwareMap.servo.get("aim");
+        angleServo = hardwareMap.get(Servo.class, "aim");
         servoLaunchLeft = hardwareMap.get(CRServo.class, "slLeft");
         servoLaunchRight = hardwareMap.get(CRServo.class, "slRight");
         mainLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -50,7 +54,6 @@ public class FirstQualNonAuto extends LinearOpMode {
 
 
         while (!isStopRequested()) {
-            aim.setPosition(10 * (300/29)); //10 is test angle and equates to 40 degrees off of vertical
             drive.setDrivePowers(
                     new PoseVelocity2d(
                             new Vector2d(
@@ -60,7 +63,14 @@ public class FirstQualNonAuto extends LinearOpMode {
                             -gamepad1.right_stick_x
                     )
             );
-
+//            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);
+            Pose2d pose = drive.localizer.getPose();
+            Vector2d diff = pose.position.minus(TARGET_POS);
+            double distToGoal = Math.hypot(diff.x, diff.y);
+            double servoDeg = AimingUtil.DistanceToAngle(distToGoal);
+            double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
+            double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
+            angleServo.setPosition((servoDeg/30) - 1);
             telemetry.addData(
                     "Servo Speeds",
                     "left: " + servoLaunchLeft.getPower() +
@@ -112,16 +122,6 @@ public class FirstQualNonAuto extends LinearOpMode {
                 launchOn = !launchOn;
             }
 
-            if (gamepad1.dpad_right) {
-                servoLaunchRight.setPower(1);
-            }
-            if (gamepad1.dpad_left) {
-                servoLaunchLeft.setPower(1);
-            }
-            if (gamepad1.dpad_up) {
-                mainLauncher.setPower(0.70);
-            }
-
             if (launchOn) {
                     mainLauncher.setPower(.70);
                     mainLauncher2.setPower(.70);
@@ -130,6 +130,7 @@ public class FirstQualNonAuto extends LinearOpMode {
                 mainLauncher2.setPower(0);
             }
             drive.updatePoseEstimate();
+            drive.localizer.update();
         }
 
     }
