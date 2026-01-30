@@ -21,12 +21,12 @@ public class RotationTest extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
+            drive.updatePoseEstimate();
+
             Pose2d pose = drive.localizer.getPose();
             double targetHeading = Math.atan2(-pose.position.y, -pose.position.x);
 
-            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), pose.heading.real - targetHeading));
-
-            drive.updatePoseEstimate();
+            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), targetHeading - pose.heading.toDouble()));
 
             telemetry.update();
         }
