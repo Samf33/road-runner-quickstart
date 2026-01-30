@@ -44,6 +44,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         waitForStart();
 
+
         while (!isStopRequested()) {
             aim.setPosition(10 * (300/29)); //10 is test angle and equates to 40 degrees off of vertical
             drive.setDrivePowers(
