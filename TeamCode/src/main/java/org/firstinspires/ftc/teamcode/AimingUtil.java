@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 public class AimingUtil {
     public static final double TICKS_PER_REV = 28.0;
     static final double SPEED_MULT = 30.0;
-    static final double MIN_SPEED = 2.0;
+    static final double MIN_SPEED = 0.5;
 
     static double DistanceToRPM(double distance) {
         /* y=0.018024x^2+5.54937x+1956.51563 */
@@ -17,7 +17,7 @@ public class AimingUtil {
         return Math.max(Math.min(0.000482561 * distance * distance + 0.127878 * distance + 29.34231, max), min);
     }
     static double getTargetVelocity(double target) {
-        return (target * TICKS_PER_REV) / 60.0;
+        return ((target * TICKS_PER_REV) / 60.0);
     }
 
     static double getVelocityToAim(double targetX, double targetY, Pose2d pose) {
