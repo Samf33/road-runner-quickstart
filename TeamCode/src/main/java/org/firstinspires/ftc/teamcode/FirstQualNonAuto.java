@@ -81,24 +81,11 @@ public class FirstQualNonAuto extends LinearOpMode {
                     "mode",
                     mode % 3 + "    0 = launch1 | 1 = launch2 | 2 = both"
             );
-
-//            telemetry.addData(
-//                    "motor speed (ticks/sec)",
-//                    "L1: " + mainLauncher.getVelocity() +
-//                            " L2: " + mainLauncher2.getVelocity()
-//            );
-//
-//            telemetry.addData(
-//                    "motor speed (RPS)",
-//                    "L1: " + mainLauncher.getVelocity() / 28 +
-//                            " L2: " + mainLauncher2.getVelocity() / 28
-//            );
-//
-//            telemetry.addData(
-//                    "motor speed (RPM)",
-//                    "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
-//                            " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
-            //);
+            telemetry.addData(
+                    "motor speed (RPM)",
+                    "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
+                            " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
+            );
 
             telemetry.update();
 
@@ -123,8 +110,8 @@ public class FirstQualNonAuto extends LinearOpMode {
             }
 
             if (launchOn) {
-                    mainLauncher.setPower(.70);
-                    mainLauncher2.setPower(.70);
+                    mainLauncher.setVelocity(motorVelo);
+                    mainLauncher2.setVelocity(motorVelo);
             } else {
                 mainLauncher.setPower(0);
                 mainLauncher2.setPower(0);
