@@ -22,33 +22,13 @@ public class AimingUtil {
     }
 
     static double getVelocityToAim(double targetX, double targetY, Pose2d pose) {
-
-//        double dx = targetX - pose.position.x;
-//        double dy = targetY - pose.position.y;
-//
-//        double newHeading = Math.atan2(dy, dx);
-//        double error = Math.IEEEremainder(newHeading - pose.heading.toDouble(), 2.0 * Math.PI);
-//
-//        return error / (2.0 * Math.PI) * SPEED_MULT;
-
-
         double dx = targetX - pose.position.x;
         double dy = targetY - pose.position.y;
 
         double newHeading = Math.atan2(dy, dx);
         double error = Math.IEEEremainder(newHeading - pose.heading.toDouble(), 2.0 * Math.PI);
 
-        double clampedError = Math.max(
-                -Math.PI / 2,
-                Math.min(Math.PI / 2, error)
-        );
-
-        double sinVal = Math.sin(clampedError);
-
-        double epsilon = 0.05;
-        sinVal = Math.copySign(Math.max(Math.abs(sinVal), epsilon), sinVal);
-
-        return SPEED_MULT * clampedError / sinVal;
+        return error / (2.0 * Math.PI) * SPEED_MULT;
     }
 
 }
