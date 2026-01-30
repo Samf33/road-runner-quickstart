@@ -22,7 +22,7 @@ public class RotationTest extends LinearOpMode {
 
         while (!isStopRequested()) {
             Pose2d pose = drive.localizer.getPose();
-            double targetHeading = Math.atan2(-pose.position.x, -pose.position.y);
+            double targetHeading = Math.atan2(-pose.position.y, -pose.position.x);
 
             drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), pose.heading.real - targetHeading));
 
