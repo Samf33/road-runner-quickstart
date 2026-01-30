@@ -67,7 +67,7 @@ public class FirstQualNonAuto extends LinearOpMode {
             Pose2d pose = drive.localizer.getPose();
             Vector2d diff = pose.position.minus(TARGET_POS);
             double distToGoal = Math.hypot(diff.x, diff.y);
-            double servoDeg = AimingUtil.DistanceToAngle(distToGoal);
+            double servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
             double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
             double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
             angleServo.setPosition((servoDeg/30) - 1);
