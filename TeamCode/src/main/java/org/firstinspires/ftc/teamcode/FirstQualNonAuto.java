@@ -63,7 +63,7 @@ public class FirstQualNonAuto extends LinearOpMode {
                                     -gamepad1.left_stick_y,
                                     -gamepad1.left_stick_x
                             ),
-                            isAiming ? AimingUtil.getVelocityToAim(57.98275605748032, 57.98275605748032, drive.localizer.getPose()) : -gamepad1.right_stick_x
+                            isAiming ? AimingUtil.getVelocityToAim(AimingUtil.TARGET_POS.x, AimingUtil.TARGET_POS.y, drive.localizer.getPose()) : -gamepad1.right_stick_x
                     )
             );
 //            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);

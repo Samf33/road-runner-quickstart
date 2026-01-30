@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 
 public class AimingUtil {
     public static final double TICKS_PER_REV = 28.0;
     static final double SPEED_MULT = 30.0;
     static final double MIN_SPEED = 0.5;
 
+    static final Vector2d TARGET_POS = new Vector2d(57.98275605748032, 57.98275605748032);
 
     static double DistanceToRPM(double distance) {
         /* y=0.018024x^2+5.54937x+1956.51563 */
