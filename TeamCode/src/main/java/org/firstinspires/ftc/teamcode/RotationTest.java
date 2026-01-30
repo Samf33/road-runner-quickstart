@@ -13,6 +13,9 @@ public class RotationTest extends LinearOpMode {
 
     MecanumDrive drive;
 
+    double targetX = 0;
+    double targetY = 0;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -24,9 +27,14 @@ public class RotationTest extends LinearOpMode {
             drive.updatePoseEstimate();
 
             Pose2d pose = drive.localizer.getPose();
-            double targetHeading = Math.atan2(-pose.position.y, -pose.position.x);
 
-            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), targetHeading - pose.heading.toDouble()));
+            double dx = targetX - pose.position.x;
+            double dy = targetY - pose.position.y;
+
+            double newHeading = Math.atan2(dy, dx);
+            double error = newHeading - pose.heading.toDouble() % 360;
+
+            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), error));
 
             telemetry.update();
         }
