@@ -16,8 +16,7 @@ public class DynamicAutoNotBad extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
-
+        drive = new MecanumDrive(hardwareMap, AimingUtil.storedPose == null ? new Pose2d(0,0,0) : AimingUtil.storedPose);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
         limelight.setPollRateHz(100);

@@ -12,7 +12,7 @@ public class AimingUtil {
     public static final double SERVO_MAX_DEG = 60.0;
     static final double MIN_SPEED = 0.5;
 
-    static Pose2d storedPose;
+    static Pose2d storedPose = null;
 
     static Vector2d TARGET_POS = new Vector2d(57.98275605748032, -57.98275605748032);
 
