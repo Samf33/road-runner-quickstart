@@ -12,7 +12,7 @@ public class AimingUtil {
     public static final double SERVO_MAX_DEG = 60.0;
     static final double MIN_SPEED = 0.5;
 
-    static final Vector2d TARGET_POS = new Vector2d(57.98275605748032, -57.98275605748032);
+    static Vector2d TARGET_POS = new Vector2d(57.98275605748032, -57.98275605748032);
 
     static double DistanceToRPM(double distance) {
         /* y=0.018024x^2+5.54937x+1956.51563 */
@@ -35,6 +35,10 @@ public class AimingUtil {
         double error = Math.IEEEremainder(newHeading - pose.heading.toDouble(), 2.0 * Math.PI);
 
         return error / (2.0 * Math.PI) * SPEED_MULT;
+    }
+
+    static void setTeamSettings(Team team) {
+        TARGET_POS = new Vector2d(TARGET_POS.x, Math.abs(TARGET_POS.y) * (team.ordinal() * 2 - 1));
     }
 
 }
