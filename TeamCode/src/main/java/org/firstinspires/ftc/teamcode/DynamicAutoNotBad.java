@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -15,6 +16,8 @@ public class DynamicAutoNotBad extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
         limelight.setPollRateHz(100);
@@ -24,7 +27,7 @@ public class DynamicAutoNotBad extends LinearOpMode {
 
         while (!isStopRequested()) {
             LLResult ball = limelight.getLatestResult();
-            boolean valid = ball != null && ball.isValid();
+            boolean valid = (ball != null) && (ball.isValid());
             double rotationDirection = 0;
 
             if (valid) {
@@ -33,7 +36,7 @@ public class DynamicAutoNotBad extends LinearOpMode {
             } else {
 
             }
-
+            
             drive.setDrivePowers(
                     new PoseVelocity2d(
                             new Vector2d(
