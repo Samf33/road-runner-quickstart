@@ -143,14 +143,33 @@ public class AlonAuto extends LinearOpMode {
         Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
         double distToGoal = Math.hypot(diff.x, diff.y);
         double servoDeg = AimingUtil.DistanceToAngle(distToGoal, AimingUtil.SERVO_MIN_DEG, AimingUtil.SERVO_MAX_DEG);
-        double targetRPM = AimingUtil.DistanceToRPM(distToGoal + 6*shotNum);
+        double targetRPM;
+        if(shotNum == 2) {
+            targetRPM = AimingUtil.DistanceToRPM(distToGoal + 18);
+        } else{
+            targetRPM = AimingUtil.DistanceToRPM(distToGoal + shotNum);
+        }
         double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
         angleServo.setPosition((servoDeg/30) - 1);
         mainLauncher.setVelocity(motorVelo);
         mainLauncher2.setVelocity(motorVelo);
     }
+    public void spinUpPID() {
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(60, 0, 0, 20));
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(60, 0, 0, 20));
+        telemetry.addData("PID 1", mainLauncher.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+        telemetry.addData("PID 2", mainLauncher2.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+        telemetry.update();
+    }
+    public void shootPID() {
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(60, 0, 0, 20));
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(60, 0, 0, 20));
+        telemetry.addData("PID 1", mainLauncher.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+        telemetry.addData("PID 2", mainLauncher2.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+        telemetry.update();
+    }
     public Action getToPower() {
-        return new InstantAction(this::power);
+        return new SequentialAction(new InstantAction(this::spinUpPID), new InstantAction(this::power));
     }
 
 //    private void power(int s) {
@@ -158,6 +177,7 @@ public class AlonAuto extends LinearOpMode {
 
 
     public void launch() {
+        shootPID();
         shotNum--;
         servoLaunchLeft.setPower(1);
         servoLaunchRight.setPower(1);
