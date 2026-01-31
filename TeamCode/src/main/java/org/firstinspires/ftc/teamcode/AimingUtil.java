@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class AimingUtil {
     public static final double TICKS_PER_REV = 28.0;
-    public static final PIDFCoefficients LAUNCH_MOTOR_PID_COEFFICIENTS = new PIDFCoefficients(0, 0, 0, 17);
+    public static final PIDFCoefficients LAUNCH_MOTOR_PID_COEFFICIENTS = new PIDFCoefficients(15, 0, 0, 21.5);
     static final double SPEED_MULT = 30.0;
     public static final double SERVO_MIN_DEG = 30.0;
     public static final double SERVO_MAX_DEG = 60.0;

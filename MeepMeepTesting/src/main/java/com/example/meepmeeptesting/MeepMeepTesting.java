@@ -38,18 +38,16 @@ public class MeepMeepTesting {
         Action getFirstRow = myBot.getDrive().actionBuilder(
                         new Pose2d(60, 20, Math.toRadians(180))
                 )
-                .waitSeconds(5)
-                .strafeTo(new Vector2d(36, 15))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(36, 60))
+                .strafeTo(new Vector2d(28, 15))
+                .strafeTo(new Vector2d(28, 60))
 
                 .build();
         Action getSecondRow = myBot.getDrive().actionBuilder(
                         new Pose2d(-13, 13, 3 * Math.PI / 4)
                 )
                 .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(12, 13), Math.PI / 2)
-                .strafeTo(new Vector2d(12, 60))
+                .strafeToLinearHeading(new Vector2d(5, 13), Math.PI / 2)
+                .strafeTo(new Vector2d(5, 60))
                 .build();
         Action getThirdRow = myBot.getDrive().actionBuilder(
                         new Pose2d(-13, 13, 3 * Math.PI / 4)
