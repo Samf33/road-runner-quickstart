@@ -14,7 +14,7 @@ public class AimingUtil {
 
     static Pose2d storedPose = null;
 
-    static Vector2d TARGET_POS = new Vector2d(59.98275605748032, -59.98275605748032);
+    static Vector2d TARGET_POS = new Vector2d(64, -64);
 
     static double DistanceToRPM(double distance) {
         /* y=0.018024x^2+5.54937x+1956.51563 */
