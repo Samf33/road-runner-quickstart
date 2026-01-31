@@ -21,6 +21,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
 public class AlonAuto extends LinearOpMode {
@@ -28,6 +30,9 @@ public class AlonAuto extends LinearOpMode {
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
+    Servo angleServo;
+    final double MULT = 1.5;
+    final Pose2d SHOOT_POS = new Pose2d(-13, 13, 3 * Math.PI / 4);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -35,56 +40,58 @@ public class AlonAuto extends LinearOpMode {
         mainLauncher = hardwareMap.get(DcMotorEx.class, "ml");
         mainLauncher2 = hardwareMap.get(DcMotorEx.class, "ml2");
         intake = hardwareMap.dcMotor.get("intake");
-
+        angleServo = hardwareMap.get(Servo.class, "aim");
         servoLaunchLeft = hardwareMap.get(CRServo.class, "slLeft");
         servoLaunchRight = hardwareMap.get(CRServo.class, "slRight");
 
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
+        angleServo.setDirection(Servo.Direction.REVERSE);
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
         drive = new MecanumDrive(hardwareMap, new Pose2d(60, 20, Math.toRadians(180)));
-
         waitForStart();
         Action getFirstRow = drive.actionBuilder(
                         new Pose2d(60, 20, Math.toRadians(180))
                 )
-                .splineTo(new Vector2d(36, 15), Math.PI / 2)
-                .lineToY(45)
-
+                .strafeToLinearHeading(new Vector2d(36, 15), Math.PI/2)
+                .strafeTo(new Vector2d(36, 60))
                 .build();
         Action getSecondRow = drive.actionBuilder(
-                        new Pose2d(-10, 10, 3 * Math.PI / 4)
+                        new Pose2d(-13, 13, 3 * Math.PI / 4)
                 )
                 .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(13, 10), Math.PI / 2)
-                .strafeTo(new Vector2d(13, 45))
+                .strafeToLinearHeading(new Vector2d(12, 13), Math.PI / 2)
+                .strafeTo(new Vector2d(12, 60))
                 .build();
         Action getThirdRow = drive.actionBuilder(
-                        new Pose2d(-10, 10, 3 * Math.PI / 4)
+                        new Pose2d(-13, 13, 3 * Math.PI / 4)
                 )
-                .strafeToLinearHeading(new Vector2d(-10, 45), Math.PI / 2)
+                .strafeToLinearHeading(new Vector2d(-15, 13), Math.PI / 2)
+                .strafeTo(new Vector2d(-15, 60))
                 .build();
 
-        Action wait = drive.actionBuilder(new Pose2d(-10, 10, 3 * Math.PI / 4))
+        Action wait = drive.actionBuilder(new Pose2d(-13, 13, 3 * Math.PI / 4))
                 .waitSeconds(1)
                 .build();
         Action goToLaunch1 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(36, 45), Math.PI / 2)
+                        new Pose2d(new Vector2d(36, 60), Math.PI / 2)
                 )
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-10, 10, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
+                .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch2 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(15, 45), Math.PI / 2)
+                        new Pose2d(new Vector2d(12, 60), Math.PI / 2)
                 )
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-10, 10, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
+                .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch3 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(-10, 45), Math.PI / 2)
+                        new Pose2d(new Vector2d(-15, 60), Math.PI / 2)
                 )
                 .setReversed(true)
 //                .splineToLinearHeading(new Pose2d(-10, 10, 3*Math.PI/4), new Rotation2d(-Math.PI/4, -Math.PI/4))
-                .strafeToLinearHeading(new Vector2d(-10, 10), 3 * Math.PI / 4)
+                .strafeToLinearHeading(new Vector2d(-13, 13), 3 * Math.PI / 4)
                 .build();
         Action fullShoot = new SequentialAction(
                 shoot(),
@@ -93,8 +100,9 @@ public class AlonAuto extends LinearOpMode {
                 idleLaunchMotors()
         );
         Action fullIntake = new SequentialAction(
+                new SleepAction(1),
                 intake(),
-                new SleepAction(1.5),
+                new SleepAction(3),
                 idleIntake(),
                 idleTransfer()
         );
@@ -124,8 +132,15 @@ public class AlonAuto extends LinearOpMode {
 //                .build());
     }
     public void power() {
-        mainLauncher.setPower(1);
-        mainLauncher2.setPower(1);
+        Pose2d pose = SHOOT_POS;
+        Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
+        double distToGoal = Math.hypot(diff.x, diff.y);
+        double servoDeg = AimingUtil.DistanceToAngle(distToGoal, AimingUtil.SERVO_MIN_DEG, AimingUtil.SERVO_MAX_DEG);
+        double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
+        double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
+        angleServo.setPosition((servoDeg/30) - 1);
+        mainLauncher.setVelocity(motorVelo);
+        mainLauncher2.setVelocity(motorVelo);
     }
     public Action getToPower() {
         return new InstantAction(this::power);
@@ -156,11 +171,11 @@ public class AlonAuto extends LinearOpMode {
         return new InstantAction(this::killServos);
     }
     public void in() {
-            intake.setPower(0.8);
-            smallLauncherWheels.setPower(0.5);
+            intake.setPower(1);
+            smallLauncherWheels.setPower(1);
     }
     public  void killTransfer() {
-        smallLauncherWheels.setPower(0);
+        smallLauncherWheels.setPower(1);
     }
     public Action idleTransfer() {
         return new InstantAction(this::killTransfer);

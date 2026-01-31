@@ -45,10 +45,9 @@ public class FirstQualNonAuto extends LinearOpMode {
         smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 //        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
-        PIDFCoefficients pidf = new PIDFCoefficients(14, 0, 0, 17);
-        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
         angleServo.setDirection(Servo.Direction.REVERSE);
-        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         waitForStart();
