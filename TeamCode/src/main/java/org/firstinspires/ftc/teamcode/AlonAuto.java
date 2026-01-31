@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Autonomous
 public class AlonAuto extends LinearOpMode {
     MecanumDrive drive;
+    int shotNum = 2;
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
@@ -46,7 +47,7 @@ public class AlonAuto extends LinearOpMode {
         smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         mainLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
-        PIDFCoefficients pidf = new PIDFCoefficients(23, 0, 0, 21.5);
+        PIDFCoefficients pidf = new PIDFCoefficients(25, 0, 0, 23.5);
         mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
         angleServo.setDirection(Servo.Direction.REVERSE);
         mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
@@ -56,39 +57,39 @@ public class AlonAuto extends LinearOpMode {
                         new Pose2d(60, 20, Math.toRadians(180))
                 )
                 .strafeToLinearHeading(new Vector2d(28, 15), Math.PI/2)
-                .strafeTo(new Vector2d(28, 60))
+                .strafeTo(new Vector2d(28, 65))
                 .build();
         Action getSecondRow = drive.actionBuilder(
                         new Pose2d(-13, 13, 3 * Math.PI / 4)
                 )
                 .setReversed(false)
                 .strafeToLinearHeading(new Vector2d(9, 13), Math.PI / 2)
-                .strafeTo(new Vector2d(9, 60))
+                .strafeTo(new Vector2d(9, 65))
                 .build();
         Action getThirdRow = drive.actionBuilder(
                         new Pose2d(-13, 13, 3 * Math.PI / 4)
                 )
                 .strafeToLinearHeading(new Vector2d(-12, 13), Math.PI / 2)
-                .strafeTo(new Vector2d(-12, 60))
+                .strafeTo(new Vector2d(-10, 65))
                 .build();
 
         Action wait = drive.actionBuilder(new Pose2d(-13, 13, 3 * Math.PI / 4))
                 .waitSeconds(1)
                 .build();
         Action goToLaunch1 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(28, 60), Math.PI / 2)
+                        new Pose2d(new Vector2d(28, 65), Math.PI / 2)
                 )
                 .setReversed(true)
                 .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch2 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(9, 60), Math.PI / 2)
+                        new Pose2d(new Vector2d(9, 65), Math.PI / 2)
                 )
                 .setReversed(true)
                 .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch3 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(-12, 60), Math.PI / 2)
+                        new Pose2d(new Vector2d(-12, 65), Math.PI / 2)
                 )
                 .setReversed(true)
 //                .splineToLinearHeading(new Pose2d(-10, 10, 3*Math.PI/4), new Rotation2d(-Math.PI/4, -Math.PI/4))
@@ -142,7 +143,7 @@ public class AlonAuto extends LinearOpMode {
         Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
         double distToGoal = Math.hypot(diff.x, diff.y);
         double servoDeg = AimingUtil.DistanceToAngle(distToGoal, AimingUtil.SERVO_MIN_DEG, AimingUtil.SERVO_MAX_DEG);
-        double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
+        double targetRPM = AimingUtil.DistanceToRPM(distToGoal + 6*shotNum);
         double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
         angleServo.setPosition((servoDeg/30) - 1);
         mainLauncher.setVelocity(motorVelo);
@@ -151,7 +152,13 @@ public class AlonAuto extends LinearOpMode {
     public Action getToPower() {
         return new InstantAction(this::power);
     }
+
+//    private void power(int s) {
+//    }
+
+
     public void launch() {
+        shotNum--;
         servoLaunchLeft.setPower(1);
         servoLaunchRight.setPower(1);
         smallLauncherWheels.setPower(1);
