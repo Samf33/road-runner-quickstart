@@ -65,7 +65,7 @@ public class Maccabot extends LinearOpMode {
     }
 
     private void initLight() {
-        rgbLight = hardwareMap.get(CRServo.class, "rgb");
+        //rgbLight = hardwareMap.get(CRServo.class, "rgb");
     }
 
     public void setIntake(boolean on) {
@@ -150,7 +150,7 @@ public class Maccabot extends LinearOpMode {
     }
 
     public void setLight(double color) {
-        rgbLight.setPower(color);
+        //rgbLight.setPower(color);
     }
 
     public void updatePoseEstimate() {
