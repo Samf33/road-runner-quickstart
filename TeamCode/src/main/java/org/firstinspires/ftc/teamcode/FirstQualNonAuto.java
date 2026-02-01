@@ -87,10 +87,10 @@ public class FirstQualNonAuto extends LinearOpMode {
                     "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
                             " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
             );
+            telemetry.addData("distance", distToGoal);
             telemetry.addData("position", drive.localizer.getPose().position);
             telemetry.addData("heading",drive.localizer.getPose().heading.toDouble());
             telemetry.addData("target RPM", targetRPM);
-
             telemetry.update();
 
             if (gamepad1.right_trigger >= 0.3) {
