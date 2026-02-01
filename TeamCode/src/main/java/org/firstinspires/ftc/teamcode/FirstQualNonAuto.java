@@ -74,15 +74,20 @@ public class FirstQualNonAuto extends LinearOpMode {
             double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
             double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
 
-            if (isAiming) {
-                double realRPM = 60 * (mainLauncher.getVelocity() / 28);
-                if (Math.abs(targetRPM - realRPM) < 50) {
-                    rgbLight.setPosition(0.5);
+
+            double realRPM = 60 * (mainLauncher.getVelocity() / 28);
+            if (Math.abs(targetRPM - realRPM) < 50) {
+                if (isAiming) {
+                    rgbLight.setPosition(0.500);
                 } else {
-                    rgbLight.setPosition(0.277);
+                    rgbLight.setPosition(0.611);
                 }
             } else {
-                rgbLight.setPosition(0.388);
+                if (isAiming) {
+                    rgbLight.setPosition(0.277);
+                } else {
+                    rgbLight.setPosition(0.333);
+                }
             }
 
             angleServo.setPosition((servoDeg/30) - 1);
