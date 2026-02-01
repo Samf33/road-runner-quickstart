@@ -14,8 +14,7 @@ public class DynamicAutoNotBad extends LinearOpMode {
     private Limelight3A limelight;
     private MecanumDrive drive;
 
-    final double ROTATE_SPEED = 0.05;
-
+    final double ROTATE_SPEED = 50;
     @Override
     public void runOpMode() {
         drive = new MecanumDrive(hardwareMap, AimingUtil.storedPose == null ? new Pose2d(0,0,0) : AimingUtil.storedPose);
@@ -30,13 +29,22 @@ public class DynamicAutoNotBad extends LinearOpMode {
             LLResult ball = limelight.getLatestResult();
             boolean valid = (ball != null) && (ball.isValid());
             double angularVelocity = 0;
+            double x = 0, y = 0;
 
             if (valid) {
-                double x = ball.getTx(), y = ball.getTy();
+                x = ball.getTx();
+                y = ball.getTy();
+
                 angularVelocity = x * ROTATE_SPEED;
             } else {
 
             }
+
+            telemetry.addData("valid", valid);
+            telemetry.addData("x", x);
+            telemetry.addData("vel", angularVelocity);
+
+            telemetry.update();
             
             drive.setDrivePowers(
                     new PoseVelocity2d(

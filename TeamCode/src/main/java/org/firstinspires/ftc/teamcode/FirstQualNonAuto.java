@@ -24,7 +24,6 @@ public class FirstQualNonAuto extends LinearOpMode {
     double angleInput = 0;
     final double SERVO_MIN_DEG = 30.0;
     final double SERVO_MAX_DEG = 60.0;
-    final Vector2d TARGET_POS = new Vector2d(57.98275605748032, 57.98275605748032);
 
     boolean maxSpeed = false;
 
@@ -67,7 +66,7 @@ public class FirstQualNonAuto extends LinearOpMode {
             );
 //            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);
             Pose2d pose = drive.localizer.getPose();
-            Vector2d diff = pose.position.minus(TARGET_POS);
+            Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
             double distToGoal = Math.hypot(diff.x, diff.y);
             double servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
             double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
