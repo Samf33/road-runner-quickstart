@@ -18,7 +18,7 @@ public class AimingUtil {
 
     static double DistanceToRPM(double distance) {
         /* y=0.018024x^2+5.54937x+1956.51563 */
-        return 0.018024 * distance * distance + 5.54937 * distance + 1956.51563;
+        return (0.018024 * distance * distance) + (5.54937 * distance) + 1956.51563;
     }
 
     static double DistanceToAngle(double distance, double min, double max) {

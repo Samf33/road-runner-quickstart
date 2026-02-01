@@ -30,13 +30,14 @@ public class AlonAuto extends LinearOpMode {
     double[] targets = new double[3];
     double[] irl = new double[3];
     int shotNum = 2;
+    Vector2d TARGET_POS = new Vector2d(-64, -64);
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
     Servo angleServo;
     final double MULT = 1.5;
-    final Pose2d SHOOT_POS = new Pose2d(-13, 13, 3 * Math.PI / 4);
-    final Pose2d SHOOT_POS_LONG = new Pose2d(60, 20, Math.toRadians(165));
+    final Pose2d SHOOT_POS = new Pose2d(-17, 17, 3 * Math.PI / 4);
+    final Pose2d SHOOT_POS_LONG = new Pose2d(60, 20, Math.toRadians(150));
 
 
     @Override
@@ -59,56 +60,61 @@ public class AlonAuto extends LinearOpMode {
         waitForStart();
 
         Action turn = drive.actionBuilder(new Pose2d(60, 20, Math.toRadians(180))
-        ).turn(-Math.PI/12).build();
+        ).turn(-Math.PI / 8).build();
         Action shootFirstThree = new SequentialAction(
                 turn,
                 new InstantAction(this::spinUpPID),
                 new InstantAction(this::powerLong),
-                new SleepAction(5.5),
+                new SleepAction(4.5),
                 shootLong()
         );
 
+
         Action getFirstRow = drive.actionBuilder(
-                        new Pose2d(60, 20, Math.toRadians(165))
+                        new Pose2d(60, 20, Math.toRadians(180) - Math.PI / 6)
                 )
-                .strafeToLinearHeading(new Vector2d(28, 15), Math.PI/2)
-                .strafeTo(new Vector2d(28, 65))
+                .strafeToLinearHeading(new Vector2d(28, 15), Math.PI / 2)
+                .strafeTo(new Vector2d(28, 68))
                 .build();
         Action getSecondRow = drive.actionBuilder(
-                        new Pose2d(-13, 13, 3 * Math.PI / 4)
+                        new Pose2d(-17, 17, 3 * Math.PI / 4)
                 )
                 .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(8, 13), Math.PI / 2)
-                .strafeTo(new Vector2d(8, 65))
+                .strafeToLinearHeading(new Vector2d(6, 13), Math.PI / 2)
+                .strafeTo(new Vector2d(6, 69))
                 .build();
         Action getThirdRow = drive.actionBuilder(
-                        new Pose2d(-13, 13, 3 * Math.PI / 4)
+                        new Pose2d(-17, 17, 3 * Math.PI / 4)
                 )
-                .strafeToLinearHeading(new Vector2d(-14, 13), Math.PI / 2)
-                .strafeTo(new Vector2d(-14, 65))
+                .strafeToLinearHeading(new Vector2d(-17, 13), Math.PI / 2)
+                .strafeTo(new Vector2d(-17, 69))
                 .build();
-
+        Action have = new InstantAction(() -> {
+            drive.updatePoseEstimate();
+            drive.localizer.update();
+            AimingUtil.storedPose = new Pose2d(-drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, -drive.localizer.getPose().heading.toDouble());
+        });
         Action wait = drive.actionBuilder(new Pose2d(-13, 13, 3 * Math.PI / 4))
                 .waitSeconds(1)
                 .build();
         Action goToLaunch1 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(28, 65), Math.PI / 2)
+                        new Pose2d(new Vector2d(28, 69), Math.PI / 2)
                 )
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
+                .splineToLinearHeading(new Pose2d(-17, 17, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch2 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(8, 65), Math.PI / 2)
+                        new Pose2d(new Vector2d(6, 69), Math.PI / 2)
                 )
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-13, 13, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
+                .splineToLinearHeading(new Pose2d(-17, 17, 3 * Math.PI / 4), new Rotation2d(-Math.PI / 4, -Math.PI / 4))
                 .build();
         Action goToLaunch3 = drive.actionBuilder(
-                        new Pose2d(new Vector2d(-14, 65), Math.PI / 2)
+                        new Pose2d(new Vector2d(-17, 69), Math.PI / 2)
                 )
                 .setReversed(true)
 //                .splineToLinearHeading(new Pose2d(-10, 10, 3*Math.PI/4), new Rotation2d(-Math.PI/4, -Math.PI/4))
-                .strafeToLinearHeading(new Vector2d(-13, 13), 3 * Math.PI / 4)
+                .strafeToLinearHeading(new Vector2d(-17, 17), 3 * Math.PI / 4)
                 .build();
 
         Action postShootBehavior = new SequentialAction(
@@ -133,28 +139,37 @@ public class AlonAuto extends LinearOpMode {
                 shootFirstThree,
                 postShootBehavior0,
 //                new ParallelAction(getFirstRow,intake()),
-                new ParallelAction(new SequentialAction(getFirstRow, goToLaunch1),fullIntake, getToPower()),
+                new ParallelAction(new SequentialAction(getFirstRow, goToLaunch1), fullIntake, getToPower()),
 //                new ParallelAction(goToLaunch1, getToPower()),
                 shoot(),
                 postShootBehavior,
 //                new ParallelAction(getSecondRow,intake()),
-                new ParallelAction(new SequentialAction(getSecondRow, goToLaunch2),fullIntake, getToPower()),
+                new ParallelAction(new SequentialAction(getSecondRow, goToLaunch2), fullIntake, getToPower()),
 //                new ParallelAction(goToLaunch2, getToPower()),
                 shoot(),
                 postShootBehavior3,
+                new InstantAction(() -> {
+                    drive.updatePoseEstimate();
+                    drive.localizer.update();
+                    AimingUtil.storedPose = new Pose2d(-drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, drive.localizer.getPose().heading.toDouble());
+                }),
 //                new ParallelAction(getThirdRow,intake()),
-                new ParallelAction(new SequentialAction(getThirdRow, goToLaunch3),fullIntake, getToPower()),
+                new ParallelAction(new SequentialAction(getThirdRow, goToLaunch3), fullIntake, getToPower(), new SequentialAction(new SleepAction(1), have)),
 //                new ParallelAction(goToLaunch3, getToPower()),
                 shoot(),
-                 new InstantAction(() -> {
-                     drive.updatePoseEstimate();
-                     drive.localizer.update();
-                     AimingUtil.storedPose = drive.localizer.getPose();
-                 })
+                new InstantAction(() -> {
+                    drive.updatePoseEstimate();
+                    drive.localizer.update();
+                    AimingUtil.storedPose = new Pose2d(-drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, -drive.localizer.getPose().heading.toDouble());
+                }),
+                new SleepAction(3)
         );
-
+        while (opModeIsActive()) {
         Actions.runBlocking(fullAuto);
-
+    }
+        drive.updatePoseEstimate();
+        drive.localizer.update();
+        AimingUtil.storedPose = new Pose2d(-drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, -drive.localizer.getPose().heading.toDouble());
 
 //        Trajectory traj = drive.TrajectoryBuilder( 22, Math.toRadians(180)
 //                .splineTo(new Vector2d(14, 22), Math.toRadians(160))
@@ -165,14 +180,14 @@ public class AlonAuto extends LinearOpMode {
     }
     public void power() {
         Pose2d pose = SHOOT_POS;
-        Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
+        Vector2d diff = pose.position.minus(TARGET_POS);
         double distToGoal = Math.hypot(diff.x, diff.y);
         double servoDeg = AimingUtil.DistanceToAngle(distToGoal, AimingUtil.SERVO_MIN_DEG, AimingUtil.SERVO_MAX_DEG);
         double targetRPM;
         if(shotNum == 2) {
-            targetRPM = AimingUtil.DistanceToRPM(distToGoal + 18);
+            targetRPM = AimingUtil.DistanceToRPM(distToGoal);
         } else{
-            targetRPM = AimingUtil.DistanceToRPM(distToGoal - 2);
+            targetRPM = AimingUtil.DistanceToRPM(distToGoal - 12);
         }
         double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
         angleServo.setPosition((servoDeg/30) - 1);
@@ -181,7 +196,7 @@ public class AlonAuto extends LinearOpMode {
     }
     public void powerLong() {
         Pose2d pose = SHOOT_POS_LONG;
-        Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
+        Vector2d diff = pose.position.minus(TARGET_POS);
         double distToGoal = Math.hypot(diff.x, diff.y);
         double servoDeg = 55;
         double targetRPM;
@@ -232,14 +247,14 @@ public class AlonAuto extends LinearOpMode {
     public Action shoot() {
         return new SequentialAction(
                 new InstantAction(() -> {
-                    Vector2d diff = SHOOT_POS.position.minus(AimingUtil.TARGET_POS);
+                    Vector2d diff = SHOOT_POS.position.minus(TARGET_POS);
                     double distToGoal = Math.hypot(diff.x, diff.y);
                    targets[2-shotNum]  = AimingUtil.DistanceToRPM(distToGoal);
                    irl[2-shotNum] = 60 * (mainLauncher.getVelocity() / 28);
                 }),
                 new InstantAction(this::launch),
                 new InstantAction(() -> {
-                    Vector2d diff = SHOOT_POS.position.minus(AimingUtil.TARGET_POS);
+                    Vector2d diff = SHOOT_POS.position.minus(TARGET_POS);
                     double distToGoal = Math.hypot(diff.x, diff.y);
                     telemetry.addData(
                         "motor speed (RPM)",
@@ -251,20 +266,20 @@ public class AlonAuto extends LinearOpMode {
         telemetry.addData("target RPM", AimingUtil.DistanceToRPM(distToGoal));
         telemetry.update();
                 }),
-                new SleepAction(2)
+                new SleepAction(1.5)
         );
     }
     public Action shootLong() {
         return new SequentialAction(
                 new InstantAction(() -> {
-                    Vector2d diff = SHOOT_POS_LONG.position.minus(AimingUtil.TARGET_POS);
+                    Vector2d diff = SHOOT_POS_LONG.position.minus(TARGET_POS);
                     double distToGoal = Math.hypot(diff.x, diff.y);
                     targets[2-shotNum]  = AimingUtil.DistanceToRPM(distToGoal);
                     irl[2-shotNum] = 60 * (mainLauncher.getVelocity() / 28);
                 }),
                 new InstantAction(this::launch),
                 new InstantAction(() -> {
-                    Vector2d diff = SHOOT_POS_LONG.position.minus(AimingUtil.TARGET_POS);
+                    Vector2d diff = SHOOT_POS_LONG.position.minus(TARGET_POS);
                     double distToGoal = Math.hypot(diff.x, diff.y);
                     telemetry.addData(
                             "motor speed (RPM)",

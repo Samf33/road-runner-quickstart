@@ -20,7 +20,9 @@ public class FirstQualNonAuto extends LinearOpMode {
     DcMotor smallLauncherWheels, intake;
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
+    double off = 0;
     Servo angleServo;
+    Boolean manualAim = false;
     Servo rgbLight;
     double angleInput = 0;
     final double SERVO_MIN_DEG = 30.0;
@@ -48,9 +50,10 @@ public class FirstQualNonAuto extends LinearOpMode {
         mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
         angleServo.setDirection(Servo.Direction.REVERSE);
         mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
-        rgbLight = hardwareMap.get(Servo.class, "rgb");
+//        rgbLight = hardwareMap.get(Servo.class, "rgb");
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, AimingUtil.storedPose == null ? new Pose2d(0,0,0) : AimingUtil.storedPose);
+//        MecanumDrive drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
         waitForStart();
 
 
@@ -66,26 +69,30 @@ public class FirstQualNonAuto extends LinearOpMode {
                             isAiming ? AimingUtil.getVelocityToAim(AimingUtil.TARGET_POS.x, AimingUtil.TARGET_POS.y, drive.localizer.getPose()) : -gamepad1.right_stick_x
                     )
             );
+            double servoDeg = 30;
 //            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);
             Pose2d pose = drive.localizer.getPose();
             Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
             double distToGoal = Math.hypot(diff.x, diff.y);
-            double servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
-            double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
-            double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
-
-            if (isAiming) {
-                double realRPM = 60 * (mainLauncher.getVelocity() / 28);
-                if (Math.abs(targetRPM - realRPM) < 50) {
-                    rgbLight.setPosition(0.5);
-                } else {
-                    rgbLight.setPosition(0.277);
-                }
-            } else {
-                rgbLight.setPosition(0.388);
+            double targetRPM = 0;
+            double motorVelo = 0;
+            if(!manualAim) {
+                servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
+                targetRPM = AimingUtil.DistanceToRPM(distToGoal);
+                motorVelo = AimingUtil.getTargetVelocity(targetRPM);
             }
+//
+//            if (isAiming) {
+//                double realRPM = 60 * (mainLauncher.getVelocity() / 28);
+//                if (Math.abs(targetRPM - realRPM) < 50) {
+//                    rgbLight.setPosition(0.5);
+//                } else {
+//                    rgbLight.setPosition(0.277);
+//                }
+//            } else {
+//                rgbLight.setPosition(0.388);
+//            }
 
-            angleServo.setPosition((servoDeg/30) - 1);
             telemetry.addData(
                     "Servo Speeds",
                     "left: " + servoLaunchLeft.getPower() +
@@ -126,14 +133,29 @@ public class FirstQualNonAuto extends LinearOpMode {
             if (gamepad1.a) {
                 launchOn = !launchOn;
             }
+            if(gamepad1.right_bumper) {
+                manualAim=true;
+            }
+            if (gamepad1.b) {
+                manualAim = false;
+            }
 
-            if (launchOn) {
+            if (launchOn && !manualAim) {
                     mainLauncher.setVelocity(motorVelo);
                     mainLauncher2.setVelocity(motorVelo);
-            } else {
+            }
+            if (manualAim && gamepad1.dpad_right) {
+                servoDeg = 60;
+                if(launchOn) {
+                    mainLauncher.setVelocity(.75);
+                    mainLauncher2.setVelocity(.75);
+                }
+            }
+            if(!launchOn) {
                 mainLauncher.setPower(0);
                 mainLauncher2.setPower(0);
             }
+            angleServo.setPosition((servoDeg/30) - 1);
             drive.updatePoseEstimate();
             drive.localizer.update();
         }
