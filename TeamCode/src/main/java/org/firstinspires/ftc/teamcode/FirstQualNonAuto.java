@@ -24,7 +24,6 @@ public class FirstQualNonAuto extends LinearOpMode {
     double angleInput = 0;
     final double SERVO_MIN_DEG = 30.0;
     final double SERVO_MAX_DEG = 60.0;
-    final Vector2d TARGET_POS = new Vector2d(57.98275605748032, 57.98275605748032);
 
     boolean maxSpeed = false;
 
@@ -45,27 +44,29 @@ public class FirstQualNonAuto extends LinearOpMode {
         smallLauncherWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         servoLaunchLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 //        mainLauncher2.setDirection(DcMotorSimple.Direction.REVERSE);
-        PIDFCoefficients pidf = new PIDFCoefficients(10, 3, 0, 11.7);
-        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
-        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+        mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
+        angleServo.setDirection(Servo.Direction.REVERSE);
+        mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, AimingUtil.storedPose == null ? new Pose2d(0,0,0) : AimingUtil.storedPose);
         waitForStart();
 
 
         while (!isStopRequested()) {
+            boolean isAiming = gamepad1.left_bumper;
+
             drive.setDrivePowers(
                     new PoseVelocity2d(
                             new Vector2d(
                                     -gamepad1.left_stick_y,
                                     -gamepad1.left_stick_x
                             ),
-                            -gamepad1.right_stick_x
+                            isAiming ? AimingUtil.getVelocityToAim(AimingUtil.TARGET_POS.x, AimingUtil.TARGET_POS.y, drive.localizer.getPose()) : -gamepad1.right_stick_x
                     )
             );
 //            double servoDeg = SERVO_MIN_DEG + angleInput * (SERVO_MAX_DEG - SERVO_MIN_DEG);
             Pose2d pose = drive.localizer.getPose();
-            Vector2d diff = pose.position.minus(TARGET_POS);
+            Vector2d diff = pose.position.minus(AimingUtil.TARGET_POS);
             double distToGoal = Math.hypot(diff.x, diff.y);
             double servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
             double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
@@ -86,7 +87,10 @@ public class FirstQualNonAuto extends LinearOpMode {
                     "L1: " + 60 * (mainLauncher.getVelocity() / 28) +
                             " L2: " + 60 * (mainLauncher2.getVelocity() / 28)
             );
-
+            telemetry.addData("distance", distToGoal);
+            telemetry.addData("position", drive.localizer.getPose().position);
+            telemetry.addData("heading",drive.localizer.getPose().heading.toDouble());
+            telemetry.addData("target RPM", targetRPM);
             telemetry.update();
 
             if (gamepad1.right_trigger >= 0.3) {

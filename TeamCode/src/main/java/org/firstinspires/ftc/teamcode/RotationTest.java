@@ -16,7 +16,7 @@ public class RotationTest extends LinearOpMode {
     double targetX = 0;
     double targetY = 0;
 
-    final double SPEED_MULT = 1.0;
+    final double SPEED_MULT = 30.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
