@@ -21,6 +21,7 @@ public class FirstQualNonAuto extends LinearOpMode {
     DcMotorEx mainLauncher2, mainLauncher;
     CRServo servoLaunchRight, servoLaunchLeft;
     Servo angleServo;
+    Servo rgbLight;
     double angleInput = 0;
     final double SERVO_MIN_DEG = 30.0;
     final double SERVO_MAX_DEG = 60.0;
@@ -47,6 +48,7 @@ public class FirstQualNonAuto extends LinearOpMode {
         mainLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
         angleServo.setDirection(Servo.Direction.REVERSE);
         mainLauncher2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, AimingUtil.LAUNCH_MOTOR_PID_COEFFICIENTS);
+        rgbLight = hardwareMap.get(Servo.class, "rgb");
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, AimingUtil.storedPose == null ? new Pose2d(0,0,0) : AimingUtil.storedPose);
         waitForStart();
@@ -71,6 +73,18 @@ public class FirstQualNonAuto extends LinearOpMode {
             double servoDeg = AimingUtil.DistanceToAngle(distToGoal, SERVO_MIN_DEG, SERVO_MAX_DEG);
             double targetRPM = AimingUtil.DistanceToRPM(distToGoal);
             double motorVelo = AimingUtil.getTargetVelocity(targetRPM);
+
+            if (isAiming) {
+                double realRPM = 60 * (mainLauncher.getVelocity() / 28);
+                if (Math.abs(targetRPM - realRPM) < 50) {
+                    rgbLight.setPosition(0.5);
+                } else {
+                    rgbLight.setPosition(0.277);
+                }
+            } else {
+                rgbLight.setPosition(0.388);
+            }
+
             angleServo.setPosition((servoDeg/30) - 1);
             telemetry.addData(
                     "Servo Speeds",
